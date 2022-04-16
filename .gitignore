@@ -1,0 +1,7 @@
+packages/
+.vs
+SQLiteDBTest/
+SQLiteHelper/bin/
+SQLiteHelper/obj/
+SQLiteHelper.Test/bin/
+SQLiteHelper.Test/obj/
