@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
+using System.Reflection;
 
 namespace SQLiteHelper
 {
@@ -201,5 +202,51 @@ namespace SQLiteHelper
 
             _sqliteDB.Tables.Remove(this);
         }
+
+        public void InsertData(SQLiteColumn[] columns, string[] values)
+        {
+            if (columns is null || columns.Length == 0)
+                throw new ArgumentException("columns param is null or no item.");
+
+            if (values is null || values.Length == 0)
+                throw new ArgumentException("values param is null or no item.");
+
+            if (columns.Length != values.Length)
+                throw new ArgumentException("The lengths of the columns and values arrays must be equal.");
+
+            try
+            {
+                using (SQLiteConnection cnn = new SQLiteConnection(_sqliteDB.ConnectionString))
+                {
+                    cnn.Open();
+                    string insert = $"INSERT INTO {Name} ({string.Join(",", columns.Select(col => col.Name))}) " +
+                        $"VALUES({string.Join(",", values)});";
+                    _sqliteDB.DoCommands(cnn, insert);
+                    cnn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SQLiteException($"An exception throw when insert data into {Name}", ex);
+            }
+
+        }
+
+        public void InsertData<T>(SQLiteColumn[] columns, T value)
+        {
+            if (columns is null || columns.Length == 0)
+                throw new ArgumentException("columns param is null or no item.");
+
+            PropertyInfo[] props = value.GetType().GetProperties();
+
+            string insert = $"INSERT INTO {Name} ({string.Join(",", columns.Select(col => col.Name))}) ";
+
+            string valueString = "(";
+
+           
+
+        }
+
+
     }
 }

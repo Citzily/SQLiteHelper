@@ -166,6 +166,49 @@ namespace SQLiteHelper
 
         }
 
+        public int DefaultCatchSize
+        {
+            get
+            {
+                int result = 0;
+                try
+                {
+                    using (SQLiteConnection cnn = new SQLiteConnection(ConnectionString))
+                    {
+                        cnn.Open();
+                        result = ReadInts(cnn, "pragma default_cache_size ;").FirstOrDefault();
+                        cnn.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+
+                return result;
+            }
+
+            set
+            {
+                if (value <= 0)
+                    throw new Exception("Default catch size can not lower then 1.");
+
+                try
+                {
+                    using (SQLiteConnection cnn = new SQLiteConnection(ConnectionString))
+                    {
+                        cnn.Open();
+                        DoCommands(cnn, $"pragma default_cache_size = {value};");
+                        cnn.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        }
+
         #endregion
 
         private SQLiteTables _tables = null;
@@ -222,7 +265,7 @@ namespace SQLiteHelper
         internal void DoCommands(SQLiteConnection cnn, params string[] commands)
         {
             SQLiteCommand sqlite = cnn.CreateCommand();
-            foreach (var command in commands)
+            foreach (string command in commands)
             {
                 sqlite.CommandText = command;
                 sqlite.ExecuteNonQuery();
